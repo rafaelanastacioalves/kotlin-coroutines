@@ -49,7 +49,7 @@ class MainViewModelTest {
         runBlocking {
             subject.snackbar.captureValues {
                 subject.onMainViewClicked()
-                assertSendsValues(2_000, "Hello, from threads!")
+                assertSendsValues(2_000, "Hello, from coroutines!")
             }
         }
     }

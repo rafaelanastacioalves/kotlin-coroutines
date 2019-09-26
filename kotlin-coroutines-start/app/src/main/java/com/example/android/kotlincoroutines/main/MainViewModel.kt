@@ -19,7 +19,9 @@ package com.example.android.kotlincoroutines.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.android.kotlincoroutines.util.BACKGROUND
+import kotlinx.coroutines.*
 
 /**
  * MainViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
@@ -28,6 +30,22 @@ import com.example.android.kotlincoroutines.util.BACKGROUND
  * results after the new Fragment or Activity is available.
  */
 class MainViewModel : ViewModel() {
+
+    private val viewModelJob = Job()
+
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    private fun makeNetworkRequest() {
+        // launch a coroutine in viewModelScope
+        viewModelScope.launch(Dispatchers.IO) {
+            // slowFetch()
+        }
+    }
 
     /**
      * Request a snackbar to display a string.
@@ -50,10 +68,12 @@ class MainViewModel : ViewModel() {
      */
     fun onMainViewClicked() {
         // TODO: Replace with coroutine implementation
-        BACKGROUND.submit {
-            Thread.sleep(1_000)
-            // use postValue since we're in a background thread
-            _snackBar.postValue("Hello, from threads!")
+        viewModelScope.launch {
+            // suspend this coroutine for one second
+            delay(1_000)
+            // resume in the main dispatcher
+            // _snackbar.value can be called directly from main thread
+            _snackBar.value = "Hello, from coroutines!"
         }
     }
 
